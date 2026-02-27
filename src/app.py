@@ -8,8 +8,8 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-import os
 from pathlib import Path
+import os
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -38,6 +38,57 @@ activities = {
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
+    },
+    # スポーツ関連
+    "Soccer": {
+        "description": "Outdoor team sport played on a field",
+        "schedule": "Wednesdays, 4:00 PM - 5:30 PM",
+        "max_participants": 22,
+        "participants": []
+    },
+    "Volleyball": {
+        "description": "Indoor team sport, three sets to win",
+        "schedule": "Tuesdays, 4:00 PM - 5:30 PM",
+        "max_participants": 12,
+        "participants": []
+    },
+    # 芸術関連
+    "Painting": {
+        "description": "Express yourself with color and canvas",
+        "schedule": "Thursdays, 3:30 PM - 5:00 PM",
+        "max_participants": 15,
+        "participants": []
+    },
+    "Drama": {
+        "description": "Acting and stage production workshop",
+        "schedule": "Mondays, 3:30 PM - 5:00 PM",
+        "max_participants": 20,
+        "participants": []
+    },
+    "Sculpture": {
+        "description": "Carve and mold three‑dimensional art",
+        "schedule": "Fridays, 2:00 PM - 3:30 PM",
+        "max_participants": 12,
+        "participants": []
+    },
+    "Photography": {
+        "description": "Learn to shoot and edit photographs",
+        "schedule": "Tuesdays, 3:30 PM - 5:00 PM",
+        "max_participants": 15,
+        "participants": []
+    },
+    # 知的活動
+    "Book Club": {
+        "description": "Discuss a new book each month",
+        "schedule": "Fridays, 3:30 PM - 4:30 PM",
+        "max_participants": 25,
+        "participants": []
+    },
+    "Math Club": {
+        "description": "Solve puzzles and compete in math contests",
+        "schedule": "Wednesdays, 3:30 PM - 4:30 PM",
+        "max_participants": 18,
+        "participants": []
     }
 }
 
@@ -59,9 +110,17 @@ def signup_for_activity(activity_name: str, email: str):
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    # Get the specific activity
     activity = activities[activity_name]
 
-    # Add student
+    # 重複登録チェック
+    if email in activity["participants"]:
+        raise HTTPException(status_code=400,
+                            detail=f"{email} is already signed up for {activity_name}")
+
+    # 定員チェック
+    if len(activity["participants"]) >= activity["max_participants"]:
+        raise HTTPException(status_code=400,
+                            detail=f"{activity_name} is full")
+
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
